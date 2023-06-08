@@ -45,10 +45,14 @@ async function run() {
         
     })
 
-    // app.get('/classes', async(req,res)=>{
-    //     const result = await classesCollection.find().toArray()
-    //     res.send(result)
-    // })
+    app.get('/instructors', async(req,res)=>{
+        const result = await instructorCollection.find().toArray()
+        res.send(result)
+    })
+    app.get('/classes', async(req,res)=>{
+        const result = await classesCollection.find().toArray()
+        res.send(result)
+    })
 
 
     // Send a ping to confirm a successful connection
