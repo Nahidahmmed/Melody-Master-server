@@ -1,5 +1,5 @@
 const express = require('express');
-const app =express();
+const app = express();
 const cors = require('cors');
 require('dotenv').config();
 const port = process.env.PORT || 5000;
@@ -10,7 +10,7 @@ app.use(express.json());
 
 
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.ht72zna.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -30,47 +30,70 @@ async function run() {
     const classesCollection = client.db("AllData").collection("classes");
     const instructorCollection = client.db("AllData").collection("instructor");
     const cartsCollection = client.db("AllData").collection("carts");
+    const usersCollection = client.db("AllData").collection("users");
 
-    app.get('/PopularClasses', async(req,res)=>{
-        const query = {}
-        const cursor = classesCollection.find(query).sort({studentsNumber: -1 }).limit(6)
-        const result = await cursor.toArray();
-        res.send(result);
-        
+    app.get('/PopularClasses', async (req, res) => {
+      const query = {}
+      const cursor = classesCollection.find(query).sort({ studentsNumber: -1 }).limit(6)
+      const result = await cursor.toArray();
+      res.send(result);
+
     })
-    app.get('/PopularInstructor', async(req,res)=>{
-        const query = {}
-        const cursor = instructorCollection.find(query).sort({numStudents: -1 }).limit(6)
-        const result = await cursor.toArray();
-        res.send(result);
-        
+    app.get('/PopularInstructor', async (req, res) => {
+      const query = {}
+      const cursor = instructorCollection.find(query).sort({ numStudents: -1 }).limit(6)
+      const result = await cursor.toArray();
+      res.send(result);
+
     })
 
-    app.get('/instructors', async(req,res)=>{
-        const result = await instructorCollection.find().toArray()
-        res.send(result)
+    app.get('/instructors', async (req, res) => {
+      const result = await instructorCollection.find().toArray()
+      res.send(result)
     })
-    app.get('/classes', async(req,res)=>{
-        const result = await classesCollection.find().toArray()
-        res.send(result)
+    app.get('/classes', async (req, res) => {
+      const result = await classesCollection.find().toArray()
+      res.send(result)
+    })
+
+    // users
+    
+    app.put('/users/:email', async (req,res) =>{
+      const email = req.params.email;
+      const user = req.body;
+      const query = {email:email};
+      const options = {upsert: true};
+      const updateDoc = {
+        $set: user,
+      }
+
+      const result = await usersCollection.updateOne(query, updateDoc, options)
+      res.send(result)
     })
 
     // cart collection 
 
-    app.get('/carts', async(req,res) => {
+    app.get('/carts', async (req, res) => {
       const email = req.query.email;
-      if(!email){
+      if (!email) {
         res.send([]);
       }
-      const query = {email: email};
+      const query = { email: email };
       const result = await cartsCollection.find(query).toArray();
       res.send(result);
     })
 
-    app.post('/carts', async(req,res)=>{
-        const item = req.body;
-        const result = await cartsCollection.insertOne(item);
-        res.send(result);
+    app.post('/carts', async (req, res) => {
+      const item = req.body;
+      const result = await cartsCollection.insertOne(item);
+      res.send(result);
+    })
+
+    app.delete('/carts/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await cartsCollection.deleteOne(query);
+      res.send(result);
     })
 
 
@@ -85,10 +108,10 @@ async function run() {
 run().catch(console.dir);
 
 
-app.get('/',(req,res) =>{
-    res.send('assignment 12 is running')
+app.get('/', (req, res) => {
+  res.send('assignment 12 is running')
 });
 
-app.listen(port, ()=>{
-    console.log(`assignment port ${port}`);
+app.listen(port, () => {
+  console.log(`assignment port ${port}`);
 })
