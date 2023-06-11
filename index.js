@@ -72,6 +72,7 @@ async function run() {
       const result = await classesCollection.updateOne(filter,updateDoc);
       res.send(result)
     })
+    
     app.patch('/classes/denied/:id', async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
@@ -83,6 +84,7 @@ async function run() {
       const result = await classesCollection.updateOne(filter,updateDoc);
       res.send(result)
     })
+
 
     // users
     app.get('/users', async (req, res) => {
