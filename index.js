@@ -46,13 +46,41 @@ async function run() {
       res.send(result);
 
     })
-
+    // all classes and instructors
     app.get('/instructors', async (req, res) => {
       const result = await instructorCollection.find().toArray()
       res.send(result)
     })
     app.get('/classes', async (req, res) => {
       const result = await classesCollection.find().toArray()
+      res.send(result)
+    })
+    app.post('/classes', async(req,res) => {
+      const newItem = req.body;
+      const result = await classesCollection.insertOne(newItem);
+      res.send(result);
+    })
+
+    app.patch('/classes/approve/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          status: 'approve'
+        }
+      }
+      const result = await classesCollection.updateOne(filter,updateDoc);
+      res.send(result)
+    })
+    app.patch('/classes/denied/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          status: 'denied'
+        }
+      }
+      const result = await classesCollection.updateOne(filter,updateDoc);
       res.send(result)
     })
 
