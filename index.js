@@ -29,15 +29,7 @@ const verifyJWT = (req, res, next) => {
   })
 }
 
-const verifyAdmin = async (req,res, next) =>{
-  const email = req.decoded.email;
-  const query = {email: email}
-  const user = await usersCollection.findOne(query);
-  if (user?.role !== 'admin'){
-    return res.status(401).send({ error: true, message: 'unauthorized access' })
-  }
-  next();
-}
+
 
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.ht72zna.mongodb.net/?retryWrites=true&w=majority`;
@@ -77,6 +69,18 @@ async function run() {
       const result = {admin: user?.role === 'admin'}
       res.send(result)
     })
+
+
+    const verifyAdmin = async (req,res, next) =>{
+      const email = req.decoded.email;
+      const query = {email: email}
+      const user = await usersCollection.findOne(query);
+      if (user?.role !== 'admin'){
+        return res.status(401).send({ error: true, message: 'unauthorized access' })
+      }
+      next();
+    }
+
     app.get('/user/instructor/:email',verifyJWT, async(req,res) =>{
       const email = req.params.email;
 
@@ -247,7 +251,7 @@ async function run() {
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
-    await client.close();
+    // await client.close();
   }
 }
 run().catch(console.dir);
