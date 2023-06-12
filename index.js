@@ -58,6 +58,16 @@ async function run() {
       res.send({ token })
     })
 
+    const verifyAdmin = async (req,res, next) =>{
+      const email = req.decoded.email;
+      const query = {email: email}
+      const user = await usersCollection.findOne(query);
+      if (user?.role !== 'admin' || 'instructor'){
+        return res.status(401).send({ error: true, message: 'unauthorized access' })
+      }
+      next();
+    }
+
     app.get('/PopularClasses', async (req, res) => {
       const query = {}
       const cursor = classesCollection.find(query).sort({ studentsNumber: -1 }).limit(6)
