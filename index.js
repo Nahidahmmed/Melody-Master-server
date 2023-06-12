@@ -62,7 +62,7 @@ async function run() {
       const email = req.decoded.email;
       const query = {email: email}
       const user = await usersCollection.findOne(query);
-      if (user?.role !== 'admin' || 'instructor'){
+      if (user?.role !== 'admin'){
         return res.status(401).send({ error: true, message: 'unauthorized access' })
       }
       next();
@@ -91,7 +91,7 @@ async function run() {
       const result = await classesCollection.find().toArray()
       res.send(result)
     })
-    app.post('/classes',verifyJWT, async (req, res) => {
+    app.post('/classes', async (req, res) => {
       const newItem = req.body;
       const result = await classesCollection.insertOne(newItem);
       res.send(result);
@@ -123,7 +123,7 @@ async function run() {
 
 
     // users
-    app.get('/users',verifyJWT, async (req, res) => {
+    app.get('/users',verifyJWT,verifyAdmin, async (req, res) => {
       const result = await usersCollection.find().toArray();
       res.send(result);
     })
@@ -167,7 +167,7 @@ async function run() {
       const email = req.params.email;
 
       if(req.decoded.email !== email){
-        res.send({admin: false})
+        return res.send({admin: false})
       }
 
       const query = {email: email}
@@ -179,7 +179,7 @@ async function run() {
       const email = req.params.email;
 
       if(req.decoded.email !== email){
-        res.send({admin: false})
+        return res.send({admin: false})
       }
 
       const query = {email: email}
@@ -191,10 +191,10 @@ async function run() {
 
     // cart collection 
 
-    app.get('/carts', verifyJWT, async (req, res) => {
+    app.get('/carts',verifyJWT,  async (req, res) => {
       const email = req.query.email;
       if (!email) {
-        res.send([]);
+        return res.send([]);
       }
 
       const decodedEmail = req.decoded.email;
@@ -221,18 +221,7 @@ async function run() {
     })
 
     // create payment 
-    app.post('/create-payment-intent', async (req, res) => {
-      const { price } = req.body;
-      const amount = price * 100;
-      const paymentIntent = await stripe.paymentIntent.create({
-        amount: amount,
-        currency: 'usd',
-        payment_method_types: ['card']
-      })
-      res.send({
-        clientSecret: paymentIntent.client_secret
-      })
-    })
+    
 
 
     // Send a ping to confirm a successful connection
