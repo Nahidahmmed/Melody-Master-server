@@ -2,6 +2,8 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 require('dotenv').config();
+const  jwt = require('jsonwebtoken');
+const stripe = require('stripe')(process.env.PAYMENT_SECRET_KEY);
 const port = process.env.PORT || 5000;
 
 // middleware
@@ -31,6 +33,13 @@ async function run() {
     const instructorCollection = client.db("AllData").collection("instructor");
     const cartsCollection = client.db("AllData").collection("carts");
     const usersCollection = client.db("AllData").collection("users");
+
+
+    app.post('/jwt' , (req,res) =>{
+      const user = req.body;
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '2h' })
+      res.send({token})
+    })
 
     app.get('/PopularClasses', async (req, res) => {
       const query = {}
@@ -151,6 +160,20 @@ async function run() {
       const query = { _id: new ObjectId(id) };
       const result = await cartsCollection.deleteOne(query);
       res.send(result);
+    })
+
+    // create payment 
+    app.post('/create-payment-intent', async(req,res) => {
+      const {price} = req.body;
+      const amount = price*100;
+      const paymentIntent = await stripe.paymentIntent.create({
+        amount: amount,
+        currency: 'usd',
+        payment_method_types: ['card']
+      })
+      res.send({
+        clientSecret: paymentIntent.client_secret
+      })
     })
 
 
