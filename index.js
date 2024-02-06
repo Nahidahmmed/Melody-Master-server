@@ -3,7 +3,6 @@ const app = express();
 const cors = require('cors');
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
-const stripe = require('stripe')(process.env.PAYMENT_SECRET_KEY);
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 5000;
 
@@ -46,7 +45,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    
+    await client.connect();
 
     const classesCollection = client.db("AllData").collection("classes");
     const instructorCollection = client.db("AllData").collection("instructor");
@@ -140,7 +139,13 @@ async function run() {
       const result = await classesCollection.find().toArray()
       res.send(result)
     })
-    
+
+    app.get('/classes/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await classesCollection.findOne(query);
+      res.send(result);
+  })
 // End -------------------------
 
     // other apis
