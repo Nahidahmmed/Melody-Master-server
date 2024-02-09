@@ -10,23 +10,23 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-const verifyJWT = (req, res, next) => {
-  const authorization = req.headers.authorization;
-  if (!authorization) {
-    return res.status(401).send({ error: true, message: 'unauthorized access' })
-  }
-  // brr token
-  const token = authorization.split(' ')[1];
+// const verifyJWT = (req, res, next) => {
+//   const authorization = req.headers.authorization;
+//   if (!authorization) {
+//     return res.status(401).send({ error: true, message: 'unauthorized access' })
+//   }
+//   // brr token
+//   const token = authorization.split(' ')[1];
 
-  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
-    if (err) {
-      return res.status(401).send({ error: true, message: 'unauthorized access' })
-    }
+//   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+//     if (err) {
+//       return res.status(401).send({ error: true, message: 'unauthorized access' })
+//     }
 
-    req.decoded = decoded;
-    next();
-  })
-}
+//     req.decoded = decoded;
+//     next();
+//   })
+// }
 
 
 
@@ -56,7 +56,7 @@ async function run() {
     // get apis
 
 
-    app.get('/user/admin/:email',verifyJWT, async(req,res) =>{
+    app.get('/user/admin/:email', async(req,res) =>{
       const email = req.params.email;
 
       if(req.decoded.email !== email){
@@ -80,7 +80,7 @@ async function run() {
       next();
     }
 
-    app.get('/user/instructor/:email',verifyJWT, async(req,res) =>{
+    app.get('/user/instructor/:email', async(req,res) =>{
       const email = req.params.email;
 
       if(req.decoded.email !== email){
@@ -93,7 +93,7 @@ async function run() {
       res.send(result)
     })
 
-    app.get('/carts',verifyJWT,  async (req, res) => {
+    app.get('/carts',  async (req, res) => {
       const email = req.query.email;
       if (!email) {
         return res.send([]);
@@ -109,7 +109,7 @@ async function run() {
       res.send(result);
     })
    // users
-   app.get('/users',verifyJWT,verifyAdmin, async (req, res) => {
+   app.get('/users',verifyAdmin, async (req, res) => {
     const result = await usersCollection.find().toArray();
     res.send(result);
   })
